@@ -11,9 +11,9 @@ import toast, { Toaster } from "react-hot-toast";
 function App() {
   const [query, setQuery] = useState("");
   const [images, setImages] = useState([]);
-  const [totalPages, setToralPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
-  const [modalImg, setModalImg] = useState({});
+  const [modalImg, setModalImg] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [loader, setLoader] = useState(false);
 
@@ -23,7 +23,7 @@ function App() {
     fetchImages(query, page)
       .then(({ data }) => {
         setImages((prevImages) => [...prevImages, ...data.results]);
-        setToralPages(data.total_pages);
+        setTotalPages(data.total_pages);
         if (!data.results.length) {
           toast.error(`Nothing was found for the word "${query}"`);
         }
@@ -35,33 +35,36 @@ function App() {
   }, [query, page]);
 
   const onSearch = (query) => {
-    if (!query) toast.error("Enter the word");
+    if (!query) {
+      toast.error("Enter a word");
+      return;
+    }
     setQuery(query);
     setImages([]);
-    setToralPages(0);
+    setTotalPages(0);
     setPage(1);
   };
 
   const openCloseModal = () => {
     setOpenModal(!openModal);
-    if (openModal) document.body.style.overflow = "auto";
-    else document.body.style.overflow = "hidden";
+    document.body.style.overflow = openModal ? "auto" : "hidden";
   };
 
-  const handleOpenModel = (currentId) => {
-    const [currentImg] = images.filter(({ id }) => id === currentId);
+  const handleOpenModal = (currentId) => {
+    const currentImg = images.find(({ id }) => id === currentId);
     setModalImg(currentImg);
     openCloseModal();
   };
 
   const onLoadMore = () => setPage((prevPage) => prevPage + 1);
+
   const visibleBtnMore = () => images.length !== 0 && page < totalPages;
 
   return (
     <>
       <SearchBar handleSearch={onSearch} />
       <Toaster position="top-right" />
-      <ImageGallery images={images} handleOpenModel={handleOpenModel} />
+      <ImageGallery images={images} handleOpenModal={handleOpenModal} />
       {loader && <Loader />}
       {visibleBtnMore() && <LoadMoreBtn onLoadMore={onLoadMore} />}
       {openModal && (
@@ -70,10 +73,8 @@ function App() {
     </>
   );
 }
+
 export default App;
-
-
-
 
 
 

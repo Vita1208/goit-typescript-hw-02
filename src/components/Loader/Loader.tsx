@@ -1,9 +1,14 @@
 import { MutatingDots } from "react-loader-spinner";
 
-export default function Loader() {
+interface LoaderProps {
+  visible: boolean;
+}
+
+export default function Loader({ visible }: LoaderProps) {
+  if (!visible) return null; 
+
   return (
     <MutatingDots
-      visible={true}
       height="100"
       width="100"
       color="#646cff"
@@ -13,3 +18,4 @@ export default function Loader() {
     />
   );
 }
+

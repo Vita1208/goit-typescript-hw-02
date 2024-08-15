@@ -1,46 +1,32 @@
 import { useEffect, useState } from "react";
+import fetchImages from "./fetchImages";
 import SearchBar from "./components/SearchBar/SearchBar";
-import  { fetchImagesBySearchQuery } from "./images-api"; 
 import "./App.css";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import ImageModal from "./components/ImageModal/ImageModal";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import Loader from "./components/Loader/Loader";
 import toast, { Toaster } from "react-hot-toast";
-
-interface Image {
-  id: string;
-  urls: {
-    regular: string;
-  };
-  alt_description?: string;
-}
-
-interface FetchImagesResponse {
-  results: Image[];
-  total_pages: number;
-}
+import { UnsplashImage } from "./fetchImages";
 
 function App() {
   const [query, setQuery] = useState<string>("");
-  const [images, setImages] = useState<Image[]>([]);
+  const [images, setImages] = useState<UnsplashImage[]>([]);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
-  const [modalImg, setModalImg] = useState<Image | null>(null);
+  const [modalImg, setModalImg] = useState<UnsplashImage | null>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
 
   useEffect(() => {
     if (!query) return;
     setLoader(true);
-    fetchImagesBySearchQuery(query, page)
-      .then((response) => {
-        if (response) {
-          setImages((prevImages) => [...prevImages, ...response.results]);
-          setTotalPages(response.total_pages);
-          if (!response.results.length) {
-            toast.error(`Nothing was found for the word "${query}"`);
-          }
+    fetchImages(query, page)
+      .then(({ data }) => {
+        setImages((prevImages) => [...prevImages, ...data.results]);
+        setTotalPages(data.total_pages);
+        if (!data.results.length) {
+          toast.error(`Nothing was found for the word "${query}"`);
         }
       })
       .catch(() => {
@@ -66,8 +52,8 @@ function App() {
   };
 
   const handleOpenModal = (currentId: string) => {
-    const currentImg = images.find(({ id }) => id === currentId) || null;
-    setModalImg(currentImg);
+    const currentImg = images.find(({ id }) => id === currentId);
+    setModalImg(currentImg || null);
     openCloseModal();
   };
 
@@ -80,7 +66,7 @@ function App() {
       <SearchBar handleSearch={onSearch} />
       <Toaster position="top-right" />
       <ImageGallery images={images} handleOpenModal={handleOpenModal} />
-      {loader && <Loader />}
+      <Loader visible={loader} />
       {visibleBtnMore() && <LoadMoreBtn onLoadMore={onLoadMore} />}
       {openModal && (
         <ImageModal openCloseModal={openCloseModal} modalImg={modalImg} />
@@ -90,6 +76,9 @@ function App() {
 }
 
 export default App;
+
+
+
 
 
 

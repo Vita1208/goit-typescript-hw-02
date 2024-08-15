@@ -1,11 +1,18 @@
+import { FormEvent } from "react";
 import css from "./SearchBar.module.css";
 
-export default function SearchBar({ handleSearch }) {
-  const onSubmit = (e) => {
+interface SearchBarProps {
+  handleSearch: (query: string) => void;
+}
+
+export default function SearchBar({ handleSearch }: SearchBarProps) {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const query = e.target.elements.search.value.trim();
-    handleSearch(query);
-    e.target.reset();
+    const form = e.currentTarget;
+    const query = form.elements.namedItem("search") as HTMLInputElement;
+    const trimmedQuery = query.value.trim();
+    handleSearch(trimmedQuery);
+    form.reset();
   };
 
   return (
@@ -24,3 +31,4 @@ export default function SearchBar({ handleSearch }) {
     </header>
   );
 }
+

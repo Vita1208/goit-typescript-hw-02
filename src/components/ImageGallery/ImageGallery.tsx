@@ -1,15 +1,27 @@
-import ImageCard from "../ImageCard/ImageCard";
-import css from './ImageGallery.module.css';
+import React from "react";
+import { UnsplashImage } from "../../fetchImages"; 
 
-export default function ImageGallery({ images, handleOpenModal }) {
-  return (
-    <ul className={css.list}>
-      {images.map((data) => (
-        <li onClick={() => handleOpenModal(data.id)} key={data.id}>
-          <ImageCard data={data} />
-        </li>
-      ))}
-    </ul>
-  );
+interface ImageGalleryProps {
+  images: UnsplashImage[]; 
+  handleOpenModal: (id: string) => void;
 }
+
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images, handleOpenModal }) => {
+  return (
+    <div>
+      {images.map((image) => (
+        <div key={image.id} onClick={() => handleOpenModal(image.id)}>
+          <img src={image.urls.small} alt={image.alt_description || "Image"} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default ImageGallery;
+
+
+
+
+
 
